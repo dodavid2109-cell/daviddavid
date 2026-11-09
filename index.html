@@ -40,7 +40,10 @@ a{color:inherit}
 .cell small{font-family:var(--mono);font-size:10px;line-height:1.2;color:var(--ink-2);letter-spacing:0;white-space:nowrap}
 .cell>button,.cell>a{text-align:left;line-height:1.25;padding:2px 0}
 #cName{grid-column:span 4}#cList{grid-column:span 6}
-#sheets{display:flex;gap:12px;align-items:center;min-width:0}#sheets button{line-height:1.25;padding:2px 0;white-space:nowrap}
+#sheets{display:flex;flex-wrap:wrap;gap:0 12px;align-items:center;min-width:0}#sheets button,#sheets a{line-height:1.25;padding:2px 0;white-space:nowrap}
+#pdfBtn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}#pdfBtn svg{flex:none;margin-top:1px}#pdfBtn:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+@media (max-width:759px){#sheets{gap:0 9px}}
+
 #cSound{grid-column:span 2;border-right:0}
 #cForm{grid-column:span 4;border-bottom:0}
 #cShow{grid-column:span 8;border-right:0;border-bottom:0}
@@ -200,6 +203,7 @@ a{color:inherit}
 .index i{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
 .index button:hover b{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 @media (prefers-reduced-motion:reduce){#pic.anim,#sheet,#note,#ann .draw,#ann .late{transition:none}}
+@media (max-width:400px){#filters{flex-wrap:wrap;justify-content:flex-start;column-gap:7px}#filters .tap{font-size:12.5px!important;padding-left:0!important;padding-right:0!important}#cForm{padding-right:4px}}
 </style>
 
 <canvas id="cv" aria-hidden="true"></canvas>
@@ -223,7 +227,7 @@ a{color:inherit}
   <div class="cell" id="cName"><small>drawn by</small>
     <!-- MARK: your mark goes here. Replace the two spans with an <img> or <svg> when it is ready. -->
     <button id="mark" aria-haspopup="true" aria-expanded="false" aria-label="david david, show contact details"><b>david</b> <span>david</span></button></div>
-  <div class="cell" id="cList"><small>sheets</small><div id="sheets"><button id="listBtn">project list</button><button id="resumeBtn">resume</button></div></div>
+  <div class="cell" id="cList"><small>sheets</small><div id="sheets"><button id="listBtn">project list</button><button id="resumeBtn">resume</button><a id="pdfBtn" href="david-david-portfolio.pdf" download="david-david-portfolio.pdf" target="_blank" rel="noopener" aria-label="Download portfolio, PDF">portfolio<svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true"><path d="M6 1.5v6.2M3.2 5l2.8 2.8L8.8 5M1.8 10.5h8.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="square"/></svg></a></div></div>
   <div class="cell" id="cSound"><small>sound</small><button id="soundBtn" aria-pressed="false">off</button></div>
   <div class="cell" id="cForm"><small>form</small><div id="shapes"></div></div>
   <div class="cell" id="cShow"><small>show . <span id="count"></span> pieces</small><div id="filters"></div></div>
@@ -1748,6 +1752,7 @@ function closeSheet(){
 $('#sheetClose').addEventListener('click',closeSheet);
 $('#listBtn').addEventListener('click',openList);
 $('#resumeBtn').addEventListener('click',()=>openResume());
+$('#pdfBtn').addEventListener('click',()=>Sound.play('press'));
 function routeHash(){const h=(location.hash||'').slice(1);if(!h){if(readerOpen)closeReader(true);else if(sheetOpen)closeSheet();return}if(h==='resume'){openResume(true);return}const p=PROJECTS.find(x=>x.slug===h);if(p){if(p.book)openBook(p,true);else openProject(p,true)}}
 addEventListener('hashchange',routeHash);
 
