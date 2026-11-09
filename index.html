@@ -1268,7 +1268,7 @@ function layout(animate=true){
   if(name==='grid'){lines=[];layoutGrid(vis);return}
   spacer.style.height='1px';
   if(name==='sphere'){
-    R=Math.min(vw*.54,(vh-topPad-botPad)*.4);
+    R=Math.min(vw*.54,(vh-topPad-botPad)*.4)*clamp(Math.sqrt(n/70),.74,1);
     const GA=Math.PI*(3-Math.sqrt(5)),pts=[];
     for(let i=0;i<n;i++){const y=1-2*(i+.5)/n,r=Math.sqrt(1-y*y),th=i*GA;pts.push([Math.cos(th)*r,y,Math.sin(th)*r])}
     /* the first thing you see is the strongest work, so heroes take the side facing you */
