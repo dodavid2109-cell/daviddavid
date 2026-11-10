@@ -41,6 +41,8 @@ a{color:inherit}
 .cell>button,.cell>a{text-align:left;line-height:1.25;padding:2px 0}
 #cName{grid-column:span 4}#cList{grid-column:span 6}
 #sheets{display:flex;flex-wrap:wrap;gap:0 12px;align-items:center;min-width:0}#sheets button,#sheets a{line-height:1.25;padding:2px 0;white-space:nowrap}
+a.live{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--ink);padding:4px 9px 5px;font-family:var(--display);font-size:15px;color:var(--ink);text-decoration:none;margin-top:4px}a.live:hover{background:var(--ink);color:var(--ground)}
+#noteLive{grid-column:1/-1;justify-self:start;font-size:13px;padding:2px 7px 3px;margin-top:2px}
 #pdfBtn{text-decoration:none;display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--ink);padding:1px 6px 2px!important;margin:2px 0}#pdfBtn:hover{background:var(--ink);color:var(--ground)}#pdfBtn svg{flex:none;margin-top:1px}#pdfBtn:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 @media (max-width:759px){#sheets{gap:0 9px}}
 
@@ -238,6 +240,7 @@ a{color:inherit}
       <p id="noteCap"></p>
       <button id="noteLink"></button>
       <div id="pager"><button id="pgPrev" aria-label="Previous image">&lsaquo;</button><span id="pgNum"></span><button id="pgNext" aria-label="Next image">&rsaquo;</button><button id="lensClose">close</button></div>
+      <a class="live" id="noteLive" target="_blank" rel="noopener" hidden></a>
     </div>
   </div>
 </div>
@@ -284,6 +287,7 @@ a{color:inherit}
                      "hero": 1 puts it on the front of the sphere.
                      "folders" groups its images into folders on its page, and keeps it off the home page.
                      "book" makes it a reader instead: it stays off the home page and opens page by page from the project list.
+                     "link" adds a button to a live version, for example the orchestra.
                      "walk" is the path to a walkthrough video, kept in the videos folder.
                      "sound": 1 means it has audio worth hearing. It opens with sound when the site's sound is on.
    To add an image by hand, add an item with its own path, for example
@@ -972,6 +976,10 @@ const PROJECTS = [
  {
   "id": "or",
   "slug": "starglyph-orchestra",
+  "link": {
+   "label": "play the orchestra",
+   "url": "https://dodavid2109-cell.github.io/Starglyph-Orchestra/"
+  },
   "title": "starglyph orchestra.",
   "cats": [
    "apps",
@@ -1534,6 +1542,7 @@ function fillLens(o){
     hi.decode&&hi.decode().catch(()=>{});
   }
   $('#noteCap').textContent='[above] '+o.caption;
+  {const L=$('#noteLive');L.hidden=!o.proj.link;if(o.proj.link){L.textContent=o.proj.link.label+' \u2197';L.href=o.proj.link.url}}
   $('#noteLink').textContent=o.proj.title+' '+dateLine(o.proj);
   const l=o.proj.list,i=l.indexOf(o);$('#pgNum').textContent=(i+1)+'/'+l.length;$('#pgPrev').hidden=$('#pgNext').hidden=$('#pgNum').hidden=l.length<2;
 }
@@ -1606,7 +1615,7 @@ function openProject(p,fromHash){
   const pv=el('button','step','\u2039'),nx_=el('button','step','\u203A');
   pv.setAttribute('aria-label','Previous project, '+seq[(k-1+seq.length)%seq.length].title);nx_.setAttribute('aria-label','Next project, '+seq[(k+1)%seq.length].title);
   pv.onclick=()=>go(-1);nx_.onclick=()=>go(1);row.append(pv,el('h1','',p.title),nx_);head.append(row);rd.stepProject=go;
-  const m=el('div','meta');m.append(el('p','sub',p.details));if(p.credits)m.append(el('p','sub',p.credits));m.append(el('p','text',p.text));head.append(m);
+  const m=el('div','meta');m.append(el('p','sub',p.details));if(p.credits)m.append(el('p','sub',p.credits));m.append(el('p','text',p.text));if(p.link){const q=el('p'),a=el('a','live',p.link.label+' \u2197');a.href=p.link.url;a.target='_blank';a.rel='noopener';q.append(a);m.append(q)}head.append(m);
   sheetBody.append(head);
   if(p.folders){
     const g=el('div','folders');
