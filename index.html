@@ -41,7 +41,7 @@ a{color:inherit}
 .cell>button,.cell>a{text-align:left;line-height:1.25;padding:2px 0}
 #cName{grid-column:span 4}#cList{grid-column:span 6}
 #sheets{display:flex;flex-wrap:wrap;gap:0 12px;align-items:center;min-width:0}#sheets button,#sheets a{line-height:1.25;padding:2px 0;white-space:nowrap}
-#pdfBtn{text-decoration:none;display:inline-flex;align-items:center;gap:4px}#pdfBtn svg{flex:none;margin-top:1px}#pdfBtn:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+#pdfBtn{text-decoration:none;display:inline-flex;align-items:center;gap:4px;border:1.5px solid var(--ink);padding:1px 6px 2px!important;margin:2px 0}#pdfBtn:hover{background:var(--ink);color:var(--ground)}#pdfBtn svg{flex:none;margin-top:1px}#pdfBtn:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 @media (max-width:759px){#sheets{gap:0 9px}}
 
 #cSound{grid-column:span 2;border-right:0}
@@ -145,6 +145,25 @@ a{color:inherit}
 .slot::after{content:"";position:absolute;inset:0;opacity:var(--cast,0);pointer-events:none}
 .slot.r::after{background:linear-gradient(90deg,rgba(17,18,16,.5),rgba(17,18,16,0) 55%)}
 .slot.l::after{background:linear-gradient(270deg,rgba(17,18,16,.5),rgba(17,18,16,0) 55%)}
+
+/* folders */
+.folders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 18px;max-width:980px;margin:0 auto}
+@media (min-width:760px){.folders{grid-template-columns:repeat(3,minmax(0,1fr));gap:44px 34px}}
+.folder{display:block;width:100%;text-align:left}
+.fbox{position:relative;width:100%;aspect-ratio:5/4}
+.fbox svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.fbox .back,.fbox .front{fill:var(--ground);stroke:var(--ink);stroke-width:1.5;vector-effect:non-scaling-stroke}
+.fbox .faint{fill:none;stroke:var(--hair);stroke-width:1;vector-effect:non-scaling-stroke}
+.paper{position:absolute;bottom:30%;width:36%;aspect-ratio:3/4;background:#fff;outline:1px solid var(--hair);overflow:hidden;transition:transform .32s cubic-bezier(.2,.85,.2,1)}
+.paper img{width:100%;height:100%;object-fit:cover;display:block}
+.paper.p0{left:12%;transform:rotate(-7deg)}.paper.p1{left:32%;transform:translateY(-6%) rotate(1deg);z-index:1}.paper.p2{left:52%;transform:rotate(6deg)}
+.folder:hover .paper.p0,.folder:focus-visible .paper.p0{transform:translateY(-16%) rotate(-11deg)}
+.folder:hover .paper.p1,.folder:focus-visible .paper.p1{transform:translateY(-26%) rotate(0)}
+.folder:hover .paper.p2,.folder:focus-visible .paper.p2{transform:translateY(-16%) rotate(10deg)}
+.flap{position:absolute;inset:0;z-index:2;pointer-events:none}
+.folder .fl{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:10px;font-family:var(--mono);font-size:13px;line-height:1.3}
+.folder .fl b{font-family:var(--display);font-size:clamp(17px,2.2vw,22px);font-weight:700;letter-spacing:-.02em}
+.backlink{display:block;margin:0 auto 18px;font-family:var(--mono);font-size:13px;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;padding:6px 0}
 
 /* a project sheet */
 #sheet{position:fixed;inset:0;z-index:40;background:var(--ground);color:var(--ink);overflow-y:auto;overscroll-behavior:contain;
@@ -262,6 +281,7 @@ a{color:inherit}
      credits, text   the project page text
      items           the images. "caption" is the note below an opened image.
                      "hero": 1 puts it on the front of the sphere.
+                     "folders" groups its images into folders on its page, and keeps it off the home page.
                      "book" makes it a reader instead: it stays off the home page and opens page by page from the project list.
                      "walk" is the path to a walkthrough video, kept in the videos folder.
                      "sound": 1 means it has audio worth hearing. It opens with sound when the site's sound is on.
@@ -297,7 +317,7 @@ const SITE = {
       { head: "SOFTWARE", list: ["Photoshop","Illustrator","InDesign","Microsoft Office Suite","AutoCAD","Revit","Rhino 3D","Sketchup"] } ]
   ],
   shapes: ["sphere","pentagram","lattice","fan","grid"],
-  filters: [["all","all","all"],["architecture","architecture","arch"],["objects","objects","objects"],["apps","apps","apps"],["type","type","type"],["graphic","graphic","graphic"]]
+  filters: [["all","all","all"],["architecture","architecture","arch"],["objects","objects","objects"],["apps","apps","apps"],["type","type","type"]]
 };
 const PROJECTS = [
  {
@@ -992,9 +1012,7 @@ const PROJECTS = [
   "id": "gd",
   "slug": "freelance-graphic-design",
   "title": "freelance graphic design.",
-  "cats": [
-   "graphic"
-  ],
+  "cats": [],
   "date": "from 2018",
   "place": "",
   "details": "From 2018 . Freelance . Logo and Brand Design",
@@ -1098,6 +1116,44 @@ const PROJECTS = [
     "caption": "sticker.",
     "a": 1.622
    }
+  ],
+  "folders": [
+   {
+    "name": "posters",
+    "slug": "posters",
+    "ids": [
+     "gd_redcarpet",
+     "gd_accelerate",
+     "gd_stride",
+     "gd_breathe",
+     "gd_unashamed",
+     "gd_move"
+    ]
+   },
+   {
+    "name": "logos",
+    "slug": "logos",
+    "ids": [
+     "gd_cosmir",
+     "gd_mlhc",
+     "gd_cruxnd",
+     "gd_tmr",
+     "gd_heavenue",
+     "gd_imagine",
+     "gd_rebranding",
+     "gd_binary"
+    ]
+   },
+   {
+    "name": "stickers",
+    "slug": "stickers",
+    "ids": [
+     "gd_st_pencil",
+     "gd_st_girl",
+     "gd_st_gamer",
+     "gd_st_heart"
+    ]
+   }
   ]
  },
  {
@@ -1180,7 +1236,7 @@ function buildItems(){
     p.list=[];
     for(const it of p.items){
       const o=Object.assign({proj:p,kind:it.walk?'walk':it.id==='sg_clip'?'video':'img',src:THUMBS[it.id]||it.src},it);
-      p.list.push(o);items.push(o);
+      p.list.push(o);if(!p.folders)items.push(o);
     }
     if(p.glyphs){
       p.glyphItems=[];
@@ -1544,8 +1600,20 @@ function openProject(p,fromHash){
   pv.onclick=()=>go(-1);nx_.onclick=()=>go(1);row.append(pv,el('h1','',p.title),nx_);head.append(row);rd.stepProject=go;
   const m=el('div','meta');m.append(el('p','sub',p.details));if(p.credits)m.append(el('p','sub',p.credits));m.append(el('p','text',p.text));head.append(m);
   sheetBody.append(head);
+  if(p.folders){
+    const g=el('div','folders');
+    for(const fd of p.folders){
+      const b=el('button','folder'),box=el('div','fbox');b.setAttribute('aria-label','Open '+fd.name+', '+fd.ids.length+' pieces');
+      box.innerHTML='<svg viewBox="0 0 100 80" preserveAspectRatio="none" aria-hidden="true"><path class="back" d="M2 12V6h30l6 6h60v66H2z"/><path class="faint" d="M2 18h96"/></svg>';
+      fd.ids.slice(0,3).forEach((id,j)=>{const o=p.list.find(x=>x.id===id),pp=el('div','paper p'+j),im=new Image();im.alt='';im.src=o.src;pp.append(im);box.append(pp)});
+      const fl=el('div','flap');fl.innerHTML='<svg viewBox="0 0 100 80" preserveAspectRatio="none" aria-hidden="true"><path class="front" d="M2 40h96v38H2z"/><path class="faint" d="M8 46h22"/></svg>';box.append(fl);
+      const lab=el('div','fl');lab.append(el('b','',fd.name+'.'),el('span','',String(fd.ids.length).padStart(2,'0')+' pcs'));
+      b.append(box,lab);b.onclick=()=>{Sound.play('press');openFolder(p,fd)};g.append(b);
+    }
+    sheetBody.append(g);
+  }
   const pl=el('div','plates');
-  for(const o of p.items.map(i=>p.list.find(x=>x.id===i.id))){
+  for(const o of (p.folders?[]:p.items.map(i=>p.list.find(x=>x.id===i.id)))){
     const f=el('figure','plate'),a=o.a||1;
     f.classList.add(p.cats.includes('apps')&&a<.7?'screen':(a<.85||(o.id.startsWith('gd_')&&a<1.25))?'tall':o===p.list[0]?'wide':'half');
     const fr=el('div','frame');fr.style.aspectRatio=String(a);
@@ -1564,6 +1632,24 @@ function openProject(p,fromHash){
   const shown=PROJECTS.filter(x=>!x.book),i=shown.indexOf(p),nx=shown[(i+1)%shown.length],b=el('button','next');b.append(el('small','','next project'),el('span','',nx.title));b.onclick=()=>{Sound.play('switch');openProject(nx);sheet.scrollTop=0};sheetBody.append(b);
   showSheet();
   if(!fromHash)try{location.hash=p.slug}catch(_){}
+}
+function openFolder(p,fd,fromHash){
+  const lazy=new Map();if(io)io.disconnect();
+  io=new IntersectionObserver(es=>{for(const x of es)if(x.isIntersecting){const o=lazy.get(x.target);if(o)x.target.src=fullSrc(o);io.unobserve(x.target)}},{root:sheet,rootMargin:'120% 0px'});
+  sheetBody.innerHTML='';
+  const head=el('header','head centered'),back=el('button','backlink','\u2039 '+p.title);back.onclick=()=>{Sound.play('release');openProject(p);sheet.scrollTop=0};head.append(back);
+  const fs=p.folders,k=fs.indexOf(fd),go=d=>{Sound.play('switch');openFolder(p,fs[(k+d+fs.length)%fs.length]);sheet.scrollTop=0};
+  const row=el('div','titlerow'),pv=el('button','step','\u2039'),nx=el('button','step','\u203A');
+  pv.setAttribute('aria-label','Previous folder');nx.setAttribute('aria-label','Next folder');pv.onclick=()=>go(-1);nx.onclick=()=>go(1);
+  row.append(pv,el('h1','',fd.name+'.'),nx);head.append(row);rd.stepProject=go;
+  const m=el('div','meta');m.append(el('p','sub',p.details+' . '+fd.ids.length+' pieces'));head.append(m);sheetBody.append(head);
+  const pl=el('div','plates');
+  for(const id of fd.ids){
+    const o=p.list.find(x=>x.id===id),a=o.a||1,f=el('figure','plate '+(a<1.25?'tall':'half')),fr=el('div','frame');fr.style.aspectRatio=String(a);
+    const im=new Image();im.alt=o.caption;fr.append(im);lazy.set(im,o);io.observe(im);f.append(fr,el('figcaption','',o.caption));pl.append(f);
+  }
+  sheetBody.append(pl);showSheet();
+  if(!fromHash)try{location.hash=p.slug+'-'+fd.slug}catch(_){}
 }
 function openList(){
   sheetBody.innerHTML='';
@@ -1753,7 +1839,7 @@ $('#sheetClose').addEventListener('click',closeSheet);
 $('#listBtn').addEventListener('click',openList);
 $('#resumeBtn').addEventListener('click',()=>openResume());
 $('#pdfBtn').addEventListener('click',()=>Sound.play('press'));
-function routeHash(){const h=(location.hash||'').slice(1);if(!h){if(readerOpen)closeReader(true);else if(sheetOpen)closeSheet();return}if(h==='resume'){openResume(true);return}const p=PROJECTS.find(x=>x.slug===h);if(p){if(p.book)openBook(p,true);else openProject(p,true)}}
+function routeHash(){const h=(location.hash||'').slice(1);if(!h){if(readerOpen)closeReader(true);else if(sheetOpen)closeSheet();return}if(h==='resume'){openResume(true);return}const p=PROJECTS.find(x=>x.slug===h);if(p){if(p.book)openBook(p,true);else openProject(p,true);return}for(const q of PROJECTS)if(q.folders)for(const fd of q.folders)if(h===q.slug+'-'+fd.slug){openFolder(q,fd,true);return}}
 addEventListener('hashchange',routeHash);
 
 /* contact: opens out of the title block when you click the name */
