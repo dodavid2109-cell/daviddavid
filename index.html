@@ -234,8 +234,7 @@ a.live{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--i
 .tftabs{display:flex;gap:18px;margin-left:auto;margin-right:60px;font-size:15px}
 .tftabs button{color:var(--ink-2);padding:8px 0;transition:color .15s}.tftabs button.on,.tftabs button:hover{color:var(--ink)}
 .tfname h1{margin:0;font-weight:700;font-size:18px;letter-spacing:-.01em}
-.tfcount{display:flex;gap:18px;margin-left:auto;font-size:15px;color:var(--ink-2)}
-.tfdl{display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--ink);padding:3px 8px 4px;text-decoration:none;font-size:15px;white-space:nowrap}.tfdl:hover{background:var(--ink);color:var(--ground)}
+.tfdl{margin-left:auto;display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--ink);padding:3px 8px 4px;text-decoration:none;font-size:15px;white-space:nowrap}.tfdl:hover{background:var(--ink);color:var(--ground)}
 .tfsec{padding-top:40px}
 .tfh{margin:0 0 18px;font-weight:600;font-size:clamp(22px,3vw,30px);letter-spacing:-.02em;line-height:1.1}
 .tftools{display:flex;flex-wrap:wrap;align-items:center;gap:12px 26px;padding:0 0 16px;border-bottom:1px solid var(--hair)}
@@ -285,7 +284,7 @@ a.live{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--i
 .tfprose{font-family:var(--mono);font-size:14px;line-height:1.6;max-width:62ch}
 .tfprose p{margin:0 0 14px}
 .tf .plates{margin-top:30px}
-@media (max-width:640px){.tftabs{gap:11px;font-size:14px;margin-right:50px}.tfname{flex-wrap:wrap;padding:8px 0;gap:6px 14px}.tfcount{margin-left:0;font-size:14px;gap:12px}.tfdl{margin-left:auto;font-size:14px}}
+@media (max-width:640px){.tftabs{gap:11px;font-size:14px;margin-right:50px}.tfname{flex-wrap:wrap;padding:8px 0;gap:6px 14px}.tfdl{margin-left:auto;font-size:14px}}
 @media (prefers-reduced-motion:reduce){#pic.anim,#sheet,#note,#ann .draw,#ann .late{transition:none}}
 @media (max-width:400px){#filters{flex-wrap:wrap;justify-content:flex-start;column-gap:7px}#filters .tap{font-size:12.5px!important;padding-left:0!important;padding-right:0!important}#cForm{padding-right:4px}}
 </style>
@@ -1719,6 +1718,7 @@ function openProject(p,fromHash){
 /* the starglyphs typeface page */
 const SGF={dir:'fonts/starglyphs/',zip:'Starglyphs.zip',
   styles:[['Regular','regular'],['Italic','italic'],['SemiBold','semibold'],['Bold','bold'],['Black','black']],
+  pen:{Regular:18.5,Italic:18.5,SemiBold:29.5,Bold:35,Black:46},
   metrics:[['cap height',857],['x-height',554],['baseline',0],['descender',-150]],
   sets:{uppercase:'ABCDEFGHIJKLMNOPQRSTUVWXYZ',lowercase:'abcdefghijklmnopqrstuvwxyz'}};
 const SG_GEO=(()=>{const PHI=(1+Math.sqrt(5))/2,RIN=1/(PHI*PHI),cx=500,cy=399.5,R=439,r=d=>d*Math.PI/180;
@@ -1753,10 +1753,9 @@ function openFont(p,fromHash){
     b.onclick=()=>{Sound.play('switch');const t=tf.querySelector('#tf-'+s);sheet.scrollTo({top:t.getBoundingClientRect().top-sheet.getBoundingClientRect().top+sheet.scrollTop-bar.offsetHeight+2,behavior:REDUCE?'auto':'smooth'})};
   }
   r1.append(nav,tabs);
-  const r2=el('div','tfrow tfname'),cnt=el('div','tfcount');
-  cnt.append(el('span','',SGF.styles.length+' styles'),el('span','','1 variable'));
+  const r2=el('div','tfrow tfname');
   const dl=file(SGF.zip,'download family ');dl.className='tfdl';dl.insertAdjacentHTML('beforeend',DL_SVG);dl.setAttribute('aria-label','Download the Starglyphs family, zip');
-  r2.append(el('h1','','starglyphs.'),cnt,dl);bar.append(r1,r2);tf.append(bar);
+  r2.append(el('h1','','starglyphs.'),dl);bar.append(r1,r2);tf.append(bar);
 
   /* styles */
   const st=el('section','tfsec');st.id='tf-styles';
@@ -1814,7 +1813,7 @@ function openFont(p,fromHash){
   const wrapG=el('div','tfgwrap'),view=el('div','tfview'),cv=document.createElement('canvas'),capL=el('div','tfcap');
   cv.setAttribute('role','img');view.append(cv,capL);
   const side=el('div'),cases=el('div','tfseg'),caseB={},grid=el('div','tfgrid');
-  for(const c of ['uppercase','lowercase']){const b=el('button','',c);b.onclick=()=>{if(cs===c)return;cs=c;cur=SGF.sets[c][0];Sound.play('switch');buildGrid();sync()};caseB[c]=b;cases.append(b)}
+  for(const c of ['uppercase','lowercase']){const b=el('button','',c);b.onclick=()=>{if(cs===c)return;cs=c;cur=SGF.sets[c][0];Sound.play('switch');buildGrid();sync(true)};caseB[c]=b;cases.append(b)}
   side.append(cases,grid);wrapG.append(view,side);gs.append(wrapG);tf.append(gs);
   function drawCell(b){
     const c=b.firstChild,w=c.clientWidth,h=c.clientHeight;if(!w)return;const dpr=Math.min(devicePixelRatio||1,3);
@@ -1827,8 +1826,17 @@ function openFont(p,fromHash){
     if(mode==='outlines'){sgConstruction(g,map,.6,'rgba(17,18,16,.28)');g.strokeStyle=ink;g.lineWidth=.9;g.strokeText(b.dataset.ch,x0,base)}
     else{g.fillStyle=ink;g.fillText(b.dataset.ch,x0,base)}
   }
-  function buildGrid(){grid.innerHTML='';for(const ch of SGF.sets[cs]){const b=el('button');b.dataset.ch=ch;const cvs=document.createElement('canvas');cvs.setAttribute('aria-hidden','true');b.append(cvs,el('small','',ch));b.setAttribute('aria-label','Glyph '+ch);b.onclick=()=>{if(cur===ch)return;cur=ch;Sound.play('tick');sync()};grid.append(b)}}
-  function drawGlyph(){
+  function buildGrid(){grid.innerHTML='';for(const ch of SGF.sets[cs]){const b=el('button');b.dataset.ch=ch;const cvs=document.createElement('canvas');cvs.setAttribute('aria-hidden','true');b.append(cvs,el('small','',ch));b.setAttribute('aria-label','Glyph '+ch);b.onclick=()=>{if(cur===ch)return;cur=ch;Sound.play('tick');sync(true)};grid.append(b)}}
+  let trace=0,traceOff=null;
+  /* switching letters: the pen traces the new letter through its nodes, then the font takes over */
+  function traceTo(){
+    cancelAnimationFrame(trace);if(REDUCE){drawGlyph(1);return}
+    const t0=performance.now(),D=520;
+    const step=now=>{const k=Math.min(1,(now-t0)/D);drawGlyph(1-Math.pow(1-k,3));if(k<1)trace=requestAnimationFrame(step)};
+    trace=requestAnimationFrame(step);
+  }
+  function drawGlyph(prog){
+    if(prog==null){cancelAnimationFrame(trace);prog=1}
     const W=view.clientWidth;if(!W)return;
     const H=Math.round(Math.min(440,Math.max(280,W*.62))),dpr=Math.min(devicePixelRatio||1,3),cs_=getComputedStyle(document.documentElement);
     cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);cv.style.height=H+'px';
@@ -1839,17 +1847,30 @@ function openFont(p,fromHash){
     for(const [n,v] of SGF.metrics){const y=Math.round(base-v/1000*fs)+.5;g.strokeStyle=v===0?ink:hair;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();g.fillStyle=ink2;g.textBaseline='bottom';g.textAlign='left';g.fillText(n,0,y-4);g.textAlign='right';g.fillText(String(v),W,y-4)}
     g.font=fs+'px "SG '+style+'"';g.textAlign='left';g.textBaseline='alphabetic';
     const x=(W-fs)/2,sk=style==='Italic'?SG_GEO.tan:0;
-    if(mode==='solid'){g.fillStyle=ink;g.fillText(cur,x,base)}
-    else{sgConstruction(g,q=>[x+(q[0]+(q[1]-SG_GEO.cy)*sk)*fs/1000,base-q[1]*fs/1000],1,'rgba(17,18,16,.32)');g.strokeStyle=ink;g.lineWidth=1.25;g.strokeText(cur,x,base)}
+    const map=q=>[x+(q[0]+(q[1]-SG_GEO.cy)*sk)*fs/1000,base-q[1]*fs/1000];
+    const paint=c=>{if(mode==='solid'){c.fillStyle=ink;c.fillText(cur,x,base)}else{c.strokeStyle=ink;c.lineWidth=1.25;c.strokeText(cur,x,base)}};
+    if(mode==='outlines')sgConstruction(g,map,1,'rgba(17,18,16,.32)');
+    const strokes=prog<1&&GLYPHS[/[A-Z]/.test(cur)?'UPPER':'lower'][cur];
+    if(!strokes){paint(g)}
+    else{
+      const o=traceOff||(traceOff=document.createElement('canvas'));o.width=cv.width;o.height=cv.height;
+      const oc=o.getContext('2d');oc.setTransform(dpr,0,0,dpr,0,0);oc.font=g.font;oc.textAlign='left';oc.textBaseline='alphabetic';paint(oc);
+      const P=strokes.map(s=>s.map(n=>map(n[0]==='T'?SG_GEO.tips[+n[1]]:SG_GEO.cross[+n[1]])));
+      const lens=P.map(s=>s.slice(1).reduce((a,q,i)=>a+Math.hypot(q[0]-s[i][0],q[1]-s[i][1]),0)),tot=lens.reduce((a,b)=>a+b,0);
+      oc.globalCompositeOperation='destination-in';oc.lineCap=oc.lineJoin='round';oc.strokeStyle='#000';oc.lineWidth=(2*SGF.pen[style]+12)*fs/1000;
+      let left=prog*tot;
+      for(let i=0;i<P.length&&left>0;i++){oc.setLineDash([Math.min(left,lens[i])+.01,tot+lens[i]+10]);oc.beginPath();P[i].forEach((q,j)=>j?oc.lineTo(q[0],q[1]):oc.moveTo(q[0],q[1]));oc.stroke();left-=lens[i]}
+      g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(o,0,0);g.restore();
+    }
     cv.setAttribute('aria-label','Starglyph '+cur+', '+style);
     capL.innerHTML='';capL.append(el('span','',cur+'  '+style.toLowerCase()),el('span','','U+'+cur.charCodeAt(0).toString(16).toUpperCase().padStart(4,'0')));
   }
-  function sync(){
+  function sync(animate){
     for(const m in modeB)modeB[m].classList.toggle('on',m===mode);for(const c in caseB)caseB[c].classList.toggle('on',c===cs);
     for(const b of grid.children)b.classList.toggle('on',b.dataset.ch===cur);
     pbtn.innerHTML='';pbtn.append(el('span','',SGF.styles.find(s=>s[0]===style)[1]));pbtn.insertAdjacentHTML('beforeend','<svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>');pbtn.setAttribute('aria-label','Style, '+style);
     opts.forEach(o=>o.setAttribute('aria-selected',String(o.dataset.v===style)));
-    const f='100px "SG '+style+'"';(document.fonts&&document.fonts.load?document.fonts.load(f):Promise.resolve()).then(drawAll,drawAll);
+    const f='100px "SG '+style+'"';(document.fonts&&document.fonts.load?document.fonts.load(f):Promise.resolve()).then(()=>{for(const b of grid.children)drawCell(b);animate?traceTo():drawGlyph()},drawAll);
   }
   const drawAll=()=>{drawGlyph();for(const b of grid.children)drawCell(b)};
   buildGrid();
