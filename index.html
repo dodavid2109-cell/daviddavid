@@ -1853,14 +1853,20 @@ function openFont(p,fromHash){
     const strokes=prog<1&&GLYPHS[/[A-Z]/.test(cur)?'UPPER':'lower'][cur];
     if(!strokes){paint(g)}
     else{
-      const o=traceOff||(traceOff=document.createElement('canvas'));o.width=cv.width;o.height=cv.height;
-      const oc=o.getContext('2d');oc.setTransform(dpr,0,0,dpr,0,0);oc.font=g.font;oc.textAlign='left';oc.textBaseline='alphabetic';paint(oc);
-      const P=strokes.map(s=>s.map(n=>map(n[0]==='T'?SG_GEO.tips[+n[1]]:SG_GEO.cross[+n[1]])));
-      const lens=P.map(s=>s.slice(1).reduce((a,q,i)=>a+Math.hypot(q[0]-s[i][0],q[1]-s[i][1]),0)),tot=lens.reduce((a,b)=>a+b,0);
-      oc.globalCompositeOperation='destination-in';oc.lineCap=oc.lineJoin='round';oc.strokeStyle='#000';oc.lineWidth=(2*SGF.pen[style]+12)*fs/1000;
-      let left=prog*tot;
-      for(let i=0;i<P.length&&left>0;i++){oc.setLineDash([Math.min(left,lens[i])+.01,tot+lens[i]+10]);oc.beginPath();P[i].forEach((q,j)=>j?oc.lineTo(q[0],q[1]):oc.moveTo(q[0],q[1]));oc.stroke();left-=lens[i]}
-      g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(o,0,0);g.restore();
+      /* the pen itself: each letter is its node path drawn with a round pen, so the trace is the letter */
+      const s=fs/1000,M=[s*dpr,0,s*sk*dpr,-s*dpr,(x-s*sk*SG_GEO.cy)*dpr,base*dpr];
+      const P=strokes.map(st=>st.map(n=>n[0]==='T'?SG_GEO.tips[+n[1]]:SG_GEO.cross[+n[1]]));
+      const lens=P.map(st=>st.slice(1).reduce((acc,q,i)=>acc+Math.hypot(q[0]-st[i][0],q[1]-st[i][1]),0)),tot=lens.reduce((m,n)=>m+n,0);
+      const pen=(c,w)=>{c.lineWidth=w;c.lineCap=c.lineJoin='round';let left=prog*tot;
+        for(let i=0;i<P.length&&left>0;i++){c.setLineDash([Math.min(left,lens[i])+.01,tot+lens[i]+10]);c.beginPath();P[i].forEach((q,j)=>j?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]));c.stroke();left-=lens[i]}};
+      const W2=2*SGF.pen[style];
+      if(mode==='solid'){g.save();g.setTransform(...M);g.strokeStyle=ink;pen(g,W2);g.restore()}
+      else{
+        const o=traceOff||(traceOff=document.createElement('canvas'));o.width=cv.width;o.height=cv.height;
+        const oc=o.getContext('2d'),lw=1.25/s;oc.setTransform(...M);oc.strokeStyle=ink;pen(oc,W2+lw);
+        oc.globalCompositeOperation='destination-out';pen(oc,Math.max(W2-lw,0));
+        g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(o,0,0);g.restore();
+      }
     }
     cv.setAttribute('aria-label','Starglyph '+cur+', '+style);
     capL.innerHTML='';capL.append(el('span','',cur+'  '+style.toLowerCase()),el('span','','U+'+cur.charCodeAt(0).toString(16).toUpperCase().padStart(4,'0')));
