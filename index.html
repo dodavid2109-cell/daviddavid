@@ -225,15 +225,12 @@ a.live{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--i
 .index i{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--ink-2);white-space:nowrap}
 .index button:hover b{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 /* the typeface page: a specimen sheet in the manner of a foundry page */
-#sheet.tf #sheetBar{position:fixed;top:env(safe-area-inset-top,0px);right:var(--gutter-r);margin:0;padding:6px 0;background:none;z-index:6}
-.tfbar{position:sticky;top:0;z-index:5;background:var(--ground);border-bottom:1.5px solid var(--ink);padding-top:6px}
+#sheet.tf #sheetBar{background:var(--ground)}
+.tfbar{position:sticky;top:0;z-index:5;background:var(--ground);border-top:1px solid var(--hair);border-bottom:1.5px solid var(--ink)}
 .tfrow{display:flex;align-items:center;gap:12px;min-height:44px}
 .tfrow+.tfrow{border-top:1px solid var(--hair)}
-.tfnav{display:flex;gap:2px;margin-left:-8px}
-.tfnav .step{font-family:var(--mono);font-size:24px;line-height:1;padding:4px 8px 8px;color:var(--ink-2);transition:color .15s}.tfnav .step:hover{color:var(--ink)}
-.tftabs{display:flex;gap:18px;margin-left:auto;margin-right:60px;font-size:15px}
+.tftabs{display:flex;gap:18px;font-size:15px;margin-left:-1px}
 .tftabs button{color:var(--ink-2);padding:8px 0;transition:color .15s}.tftabs button.on,.tftabs button:hover{color:var(--ink)}
-.tfname h1{margin:0;font-weight:700;font-size:18px;letter-spacing:-.01em}
 .tfdl{margin-left:auto;display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--ink);padding:3px 8px 4px;text-decoration:none;font-size:15px;white-space:nowrap}.tfdl:hover{background:var(--ink);color:var(--ground)}
 .tfsec{padding-top:40px}
 .tfh{margin:0 0 18px;font-weight:600;font-size:clamp(22px,3vw,30px);letter-spacing:-.02em;line-height:1.1}
@@ -284,7 +281,7 @@ a.live{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--i
 .tfprose{font-family:var(--mono);font-size:14px;line-height:1.6;max-width:62ch}
 .tfprose p{margin:0 0 14px}
 .tf .plates{margin-top:30px}
-@media (max-width:640px){.tftabs{gap:11px;font-size:14px;margin-right:50px}.tfname{flex-wrap:wrap;padding:8px 0;gap:6px 14px}.tfdl{margin-left:auto;font-size:14px}}
+@media (max-width:640px){.tftabs{gap:12px;font-size:14px}.tfdl{margin-left:auto;font-size:14px}}
 @media (prefers-reduced-motion:reduce){#pic.anim,#sheet,#note,#ann .draw,#ann .late{transition:none}}
 @media (max-width:400px){#filters{flex-wrap:wrap;justify-content:flex-start;column-gap:7px}#filters .tap{font-size:12.5px!important;padding-left:0!important;padding-right:0!important}#cForm{padding-right:4px}}
 </style>
@@ -1681,18 +1678,22 @@ function makePlates(p,lazy){
   }
   return pl;
 }
-function openProject(p,fromHash){
-  if(p.id==='sg')return openFont(p,fromHash);
-  const lazy=new Map();if(io)io.disconnect();
-  io=new IntersectionObserver(es=>{for(const x of es)if(x.isIntersecting){const o=lazy.get(x.target);if(o)x.target.src=fullSrc(o);io.unobserve(x.target)}},{root:sheet,rootMargin:'120% 0px'});
-  sheetBody.innerHTML='';
+/* every project sheet opens the same way: centred title between its arrows, then details and text */
+function makeHead(p){
   const head=el('header','head centered'),row=el('div','titlerow'),seq=PROJECTS.filter(x=>!x.book),k=seq.indexOf(p);
   const go=d=>{const q=seq[(k+d+seq.length)%seq.length];Sound.play('switch');openProject(q);sheet.scrollTop=0};
   const pv=el('button','step','\u2039'),nx_=el('button','step','\u203A');
   pv.setAttribute('aria-label','Previous project, '+seq[(k-1+seq.length)%seq.length].title);nx_.setAttribute('aria-label','Next project, '+seq[(k+1)%seq.length].title);
   pv.onclick=()=>go(-1);nx_.onclick=()=>go(1);row.append(pv,el('h1','',p.title),nx_);head.append(row);rd.stepProject=go;
   const m=el('div','meta');m.append(el('p','sub',p.details));if(p.credits)m.append(el('p','sub',p.credits));m.append(el('p','text',p.text));if(p.link){const q=el('p'),a=el('a','live',p.link.label+' \u2197');a.href=p.link.url;a.target='_blank';a.rel='noopener';q.append(a);m.append(q)}head.append(m);
-  sheetBody.append(head);
+  return head;
+}
+function openProject(p,fromHash){
+  if(p.id==='sg')return openFont(p,fromHash);
+  const lazy=new Map();if(io)io.disconnect();
+  io=new IntersectionObserver(es=>{for(const x of es)if(x.isIntersecting){const o=lazy.get(x.target);if(o)x.target.src=fullSrc(o);io.unobserve(x.target)}},{root:sheet,rootMargin:'120% 0px'});
+  sheetBody.innerHTML='';
+  sheetBody.append(makeHead(p));
   if(p.folders){
     const g=el('div','folders');
     for(const fd of p.folders){
@@ -1738,24 +1739,19 @@ function openFont(p,fromHash){
   const lazy=new Map();if(io)io.disconnect();if(tfRO){tfRO.disconnect();tfRO=null}
   io=new IntersectionObserver(es=>{for(const x of es)if(x.isIntersecting){const o=lazy.get(x.target);if(o)x.target.src=fullSrc(o);io.unobserve(x.target)}},{root:sheet,rootMargin:'120% 0px'});
   sheetBody.innerHTML='';
-  const tf=el('div','tf'),seq=PROJECTS.filter(x=>!x.book),k=seq.indexOf(p);
-  const go=d=>{const q=seq[(k+d+seq.length)%seq.length];Sound.play('switch');openProject(q);sheet.scrollTop=0};rd.stepProject=go;
+  const tf=el('div','tf');
   const file=(name,label)=>{const a=el('a','',label);a.href=SGF.dir+name;a.download=name;a.addEventListener('click',()=>Sound.play('press'));return a};
 
-  /* the bar: steppers and section tabs, then the family line */
-  const bar=el('div','tfbar'),r1=el('div','tfrow'),nav=el('div','tfnav');
-  const pv=el('button','step','‹'),nx=el('button','step','›');
-  pv.setAttribute('aria-label','Previous project, '+seq[(k-1+seq.length)%seq.length].title);nx.setAttribute('aria-label','Next project, '+seq[(k+1)%seq.length].title);
-  pv.onclick=()=>go(-1);nx.onclick=()=>go(1);nav.append(pv,nx);
+  /* the standard project header, then a sticky bar for the sections */
+  sheetBody.append(makeHead(p));
+  const bar=el('div','tfbar'),r1=el('div','tfrow');
   const tabs=el('nav','tftabs'),tabB={};tabs.setAttribute('aria-label','Sections');
   for(const s of ['styles','glyphs','details','license']){
     const b=el('button','',s);tabB[s]=b;tabs.append(b);
-    b.onclick=()=>{Sound.play('switch');const t=tf.querySelector('#tf-'+s);sheet.scrollTo({top:t.getBoundingClientRect().top-sheet.getBoundingClientRect().top+sheet.scrollTop-bar.offsetHeight+2,behavior:REDUCE?'auto':'smooth'})};
+    b.onclick=()=>{Sound.play('switch');const t=tf.querySelector('#tf-'+s);sheet.scrollTo({top:t.getBoundingClientRect().top-sheet.getBoundingClientRect().top+sheet.scrollTop-bar.offsetHeight-parseFloat(bar.style.top||0)+2,behavior:REDUCE?'auto':'smooth'})};
   }
-  r1.append(nav,tabs);
-  const r2=el('div','tfrow tfname');
   const dl=file(SGF.zip,'download family ');dl.className='tfdl';dl.insertAdjacentHTML('beforeend',DL_SVG);dl.setAttribute('aria-label','Download the Starglyphs family, zip');
-  r2.append(el('h1','','starglyphs.'),dl);bar.append(r1,r2);tf.append(bar);
+  r1.append(tabs,dl);bar.append(r1);tf.append(bar);
 
   /* styles */
   const st=el('section','tfsec');st.id='tf-styles';
@@ -1887,7 +1883,7 @@ function openFont(p,fromHash){
   for(const [a,b] of [['family name','Starglyphs'],['designed by','David David'],['category','Display, calligraphic'],['available styles','5 static, 1 variable'],['variable axes','weight 400 to 900, slant 0° to -10°'],['characters','A to Z, a to z'],['formats','OTF, TTF, WOFF2'],['version','1.000'],['debut','2025'],['license','Free for personal use. Commercial use by permission.']]){const r=el('div');r.append(el('dt','',a),el('dd','',b));tb.append(r)}
   dt.append(tb,el('h3','tfh3','story'));
   const pr=el('div','tfprose');
-  for(const t of [p.text,'The font sets the heavy stroke alone, with round ends and sharp joins. Regular draws it with a 37 unit pen. SemiBold, Bold and Black widen that pen to 59, 70 and 92 units, and the italic leans it 10°. The variable font moves through all of them.'])pr.append(el('p','',t));
+  for(const t of ['The font sets the heavy stroke alone, with round ends and sharp joins. Regular draws it with a 37 unit pen. SemiBold, Bold and Black widen that pen to 59, 70 and 92 units, and the italic leans it 10°. The variable font moves through all of them.'])pr.append(el('p','',t));
   dt.append(pr,makePlates(p,lazy));tf.append(dt);
 
   /* license */
@@ -1902,8 +1898,9 @@ function openFont(p,fromHash){
   sheetBody.append(tf);
   const order=['styles','glyphs','details','license'];
   sheet.onscroll=()=>{if(!sheetBody.contains(tf))return;const lim=bar.getBoundingClientRect().bottom+40;let on='styles';for(const s of order){if(tf.querySelector('#tf-'+s).getBoundingClientRect().top<=lim)on=s}for(const s of order)tabB[s].classList.toggle('on',s===on)};
-  showSheet();sheet.onscroll();
-  tfRO=new ResizeObserver(()=>drawAll());tfRO.observe(view);tfRO.observe(grid);sync();
+  showSheet();
+  const dock=()=>{bar.style.top=document.getElementById('sheetBar').offsetHeight+'px'};dock();sheet.onscroll();
+  tfRO=new ResizeObserver(()=>{dock();drawAll()});tfRO.observe(view);tfRO.observe(grid);sync();
   if(!fromHash)try{location.hash=p.slug}catch(_){}
 }
 function openFolder(p,fd,fromHash){
@@ -2157,7 +2154,8 @@ $('#soundBtn').addEventListener('click',()=>setSound(!Sound.on));
 addEventListener('keydown',e=>{
   if(readerOpen){if(e.key==='Escape')closeReader();else if(e.key==='ArrowRight'||e.key===' ')turn(1);else if(e.key==='ArrowLeft')turn(-1);return}
   if(e.key==='Escape'){if(sheetOpen)closeSheet();else if(opened)closeLens();else closeContact();return}
-  if(sheetOpen){if(sheetBody.querySelector('.titlerow')&&(e.key==='ArrowRight'||e.key==='ArrowLeft'))rd.stepProject(e.key==='ArrowRight'?1:-1);return}
+  if(sheetOpen){const ae=document.activeElement;if(ae&&(/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)||ae.closest('.tfpicklist')))return;
+    if(sheetBody.querySelector('.titlerow')&&(e.key==='ArrowRight'||e.key==='ArrowLeft'))rd.stepProject(e.key==='ArrowRight'?1:-1);return}
   if(opened){if(e.key==='ArrowRight')stepLens(1);if(e.key==='ArrowLeft')stepLens(-1);return}
   if((e.key==='+'||e.key==='=')&&!isGrid())setZoom(zoomT*1.12);
   if((e.key==='-'||e.key==='_')&&!isGrid())setZoom(zoomT/1.12);
