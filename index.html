@@ -1419,6 +1419,7 @@ function buildItems(){
       const o=Object.assign({proj:p,kind:it.walk?'walk':it.id==='sg_clip'?'video':'img',src:THUMBS[it.id]||it.src},it);
       p.list.push(o);if(!p.folders)items.push(o);
     }
+    if(!p.folders){const keep=new Set([...p.items.filter(i=>i.hero),...p.items.filter(i=>!i.hero)].slice(0,9).map(i=>i.id));for(const o of p.list)if(!keep.has(o.id))o.minor=true}
     if(p.glyphs){
       p.glyphItems=[];
       for(const set of ['UPPER','lower'])for(const k of Object.keys(GLYPHS[set])){
@@ -1440,8 +1441,8 @@ function buildItems(){
   const mk=(o,extra)=>({item:o,extra,alpha:1,x:0,y:0,w:1,h:1,z:0,fx:0,fy:0,fw:1,fh:1,fa:0,delay:0,ta:1,p:[0,0,0],g:null});
   items.forEach(o=>tiles.push(mk(o,false)));
   /* the drawn forms need more tiles than there are pieces of work, so they repeat some */
-  const pool=shuffled(items.filter(o=>o.kind!=='glyph'||!o.minor),29);
-  for(let i=0;i<150;i++)tiles.push(mk(pool[i%pool.length],true));
+  const pool=shuffled(items.filter(o=>!o.minor),29);
+  for(let i=0;i<110;i++)tiles.push(mk(pool[i%pool.length],true));
 }
 
 /* view */
@@ -1717,19 +1718,17 @@ function lensRect(o){
   return{x:(vw-w)/2,y:top+(mh-h)/2,w,h};
 }
 function drawAnn(o,r){
-  /* a drafting stylus: socket, wire, barrel, collar, needle. Where it touches, a small registration mark. */
+  /* an architectural leader: up from the caption, a 45° run, a slim closed arrowhead where it lands */
   const w=r.w,h=r.h,nx=Math.min(10,w*.05),ny=h+21,reach=clamp(Math.min(w,h)*.14,26,58),elbowY=h-reach*.55;
   const u=Math.SQRT1_2,ex=nx+reach*.5,ey=elbowY-reach*.5,L=reach*1.5,tipX=ex+u*L,tipY=ey-u*L;
-  const at=d=>[ex+u*d,ey-u*d],off=(q,k)=>[q[0]+u*k,q[1]+u*k];
-  const b0=L*.1,b1=L*.42,c1=L*.5,n0=L*.56;
-  const quad=(d0,d1,k0,k1)=>{const a=at(d0),b=at(d1),A=off(a,k0),B=off(b,k1),C=off(b,-k1),D=off(a,-k0);return`M${A[0]} ${A[1]}L${B[0]} ${B[1]}L${C[0]} ${C[1]}L${D[0]} ${D[1]}Z`};
+  const at=d=>[ex+u*d,ey-u*d];
   const wire=`M${nx} ${ny}V${elbowY}L${ex} ${ey}`;
-  const mark=`M${tipX-7} ${tipY-7}L${tipX-3} ${tipY-3}M${tipX+3} ${tipY+3}L${tipX+7} ${tipY+7}M${tipX+7} ${tipY-7}L${tipX+3} ${tipY-3}M${tipX-3} ${tipY+3}L${tipX-7} ${tipY+7}`;
   if(o.kind==='walk'){const wr=`M${nx} ${ny}V${h+3}`;ann.setAttribute('width',w);ann.setAttribute('height',h);ann.innerHTML=`<path class="thin draw" pathLength="1" d="${wr}"/><rect class="open" x="${nx-3}" y="${ny-3}" width="6" height="6"/>`;const n0=$('#note'),W0=Math.min(vw-r.x-nx-9-16,560);n0.style.top=(h+14)+'px';n0.style.paddingLeft=(nx+9)+'px';n0.style.width=(nx+9+W0)+'px';return}
   let s=`<path class="halo draw" pathLength="1" d="${wire}"/><path class="thin draw" pathLength="1" d="${wire}"/>`;
   s+=`<rect class="open" x="${nx-3}" y="${ny-3}" width="6" height="6"/>`;
-  s+=`<g class="late"><path class="nib" d="${quad(b0,b1,2.4,2.4)}"/><path class="open" d="${quad(b1+1.5,c1,3,3)}"/><path class="nib" d="${quad(n0-2,L,1.5,0)}"/>`;
-  s+=`<path class="halo" style="stroke-width:3" d="${mark}"/><path class="thin" d="${mark}"/></g>`;
+  const AL=10,AW=2.6,B=at(L-AL),T=at(L),run=`M${ex} ${ey}L${B[0]} ${B[1]}`;
+  const head=`M${T[0]} ${T[1]}L${B[0]+u*AW} ${B[1]+u*AW}L${B[0]-u*AW} ${B[1]-u*AW}Z`;
+  s+=`<g class="late"><path class="halo" d="${run}"/><path class="thin" d="${run}"/><path class="nib" d="${head}"/></g>`;
   ann.setAttribute('width',w);ann.setAttribute('height',h);ann.innerHTML=s;
   const n=$('#note'),W=Math.min(vw-r.x-nx-9-16,560);n.style.top=(h+14)+'px';n.style.paddingLeft=(nx+9)+'px';n.style.width=(nx+9+W)+'px';
 }
