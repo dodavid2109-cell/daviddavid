@@ -2057,7 +2057,7 @@ function makeCarousel(p,ids,strip){
   /* the shelf runs to the edges of the sheet, its first piece lined up with the text */
   const bleed=()=>{const s=sheet.getBoundingClientRect(),w=sheetBody.getBoundingClientRect(),L=w.left-s.left,R=s.left+sheet.clientWidth-w.right;
     track.style.marginLeft=-L+'px';track.style.marginRight=-R+'px';track.style.paddingLeft=L+'px';track.style.paddingRight=R+'px';track.style.scrollPaddingLeft=L+'px';
-    const h=Math.max(240,Math.min(innerHeight*.54,600,innerWidth<700?innerWidth*1.05:1e9));track.style.setProperty('--ch',h+'px');update()};
+    const h=strip?Math.max(170,Math.min(innerHeight*.34,310,innerWidth<700?innerWidth*.6:1e9)):Math.max(240,Math.min(innerHeight*.54,600,innerWidth<700?innerWidth*1.05:1e9));track.style.setProperty('--ch',h+'px');update()};
   const ro=new ResizeObserver(bleed);ro.observe(sheet);carROs.push(ro);requestAnimationFrame(bleed);
   return car;
 }
